@@ -1,14 +1,15 @@
 {
-
-	"1": {
-		"Hacker news": "https://news.ycombinator.com/rss"
+	"英文媒体": {
+		"BBC News - World": "http://127.0.0.1:1200/bbc/world"
 	},
-
-	"2": {
-		"yitianshijie twitter": "https://nitter.net/yitianshijieipn/rss"
+	"新兴媒体": {
+		"爱范儿": "https://www.ifanr.com/feed",
+		"好奇心日报 - 长文章": "http://127.0.0.1:1200/qdaily/tag/1068"
 	},
-
-	"3": {
-		"中国大陆新闻状态": "https://rsshub.app/wikipedia/mainland"
+	"热门论坛": {
+		"V2EX - 最热主题": "http://127.0.0.1:1200/v2ex/topics/hot"
+	},
+	"个人博客": {
+		"ProgramCZ's Blog": "https://programcz.github.io/feed.xml"
 	}
 }
