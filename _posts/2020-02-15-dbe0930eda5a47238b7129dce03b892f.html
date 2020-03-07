@@ -61,11 +61,13 @@ description: RSSub是一个无需自备服务器的RSS订阅器，完全由GitHu
 </span><span class="p">}</span><span class="w">
 </span></code></pre></div></div>
 
-<p>P.S. 如果发现不能解析的订阅源，欢迎前往<a href="https://github.com/ProgramCZ/rssub/issues" target="_blank">Issues</a>向我说明。</p>
+<p class="info">默认情况下，RSSub只抓取订阅源中最近一周的文章。</p>
+
+<p class="warning">如果发现不能解析的订阅源，欢迎前往<a href="https://github.com/ProgramCZ/rssub/issues" target="_blank">Issues</a>向我说明。</p>
 
 <h4 id="231-内置rsshub服务">2.3.1 内置RSSHub服务</h4>
 
-<p>RSSub内置<a href="https://docs.rsshub.app/" target="_blank">RSSHub</a>服务，也就是说每个用户都会有一个专属的<a href="https://docs.rsshub.app/" target="_blank">RSSHub</a>服务，所以如果添加<a href="https://docs.rsshub.app/" target="_blank">RSSHub</a>的订阅源，按照<code class="language-plaintext highlighter-rouge">http://127.0.0.1:1200/bbc/world</code>的形式即可。</p>
+<p><strong>RSSub内置<a href="https://docs.rsshub.app/" target="_blank">RSSHub</a>服务，也就是说每个用户都会有一个专属的<a href="https://docs.rsshub.app/" target="_blank">RSSHub</a>服务，所以如果添加<a href="https://docs.rsshub.app/" target="_blank">RSSHub</a>的订阅源，按照<code class="language-plaintext highlighter-rouge">http://127.0.0.1:1200/bbc/world</code>的形式即可。</strong></p>
 
 <p>另外，可以前往<code class="language-plaintext highlighter-rouge">.github/workflows/crawl-articles.yml</code>中参考<a href="https://docs.rsshub.app/install/#tian-jia-pei-zhi-2" target="_blank">教程</a>自定义配置<a href="https://docs.rsshub.app/" target="_blank">RSSHub</a>服务，修改这里：</p>
 
@@ -86,7 +88,7 @@ description: RSSub是一个无需自备服务器的RSS订阅器，完全由GitHu
     <span class="pi">-</span> <span class="na">cron</span><span class="pi">:</span> <span class="s1">'</span><span class="s">0</span><span class="nv"> </span><span class="s">0,4,10,14</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*'</span> <span class="c1"># Modify here</span>
 </code></pre></div></div>
 
-<p>上述语句表示在每天的00:00，04:00，10:00和14:00同步订阅文章，需要注意的是此处为UTC时间，相当于北京时间减去八个小时。</p>
+<p class="info">上述语句表示在每天的00:00，04:00，10:00和14:00同步订阅文章，需要注意的是此处为UTC时间，相当于北京时间减去八个小时。</p>
 
 <h3 id="25-设置站点信息">2.5 设置站点信息</h3>
 
@@ -107,7 +109,7 @@ description: RSSub是一个无需自备服务器的RSS订阅器，完全由GitHu
 
 <h3 id="26-开启pages服务">2.6 开启Pages服务</h3>
 
-<p>打开项目主页的<code class="language-plaintext highlighter-rouge">Setting/Options</code>：</p>
+<p>打开项目主页的<code class="language-plaintext highlighter-rouge">Settings/Options</code>：</p>
 
 <div align="center"><img alt="title" src="https://cdn.jsdelivr.net/gh/ProgramCZ/image_cloud_a@master/2020-02/00.png" width="100%" /></div>
 
@@ -117,7 +119,11 @@ description: RSSub是一个无需自备服务器的RSS订阅器，完全由GitHu
 
 <h3 id="27-阅读订阅文章">2.7 阅读订阅文章</h3>
 
-<p>访问上图中显示的地址即可阅读订阅文章，比如我的地址为<a href="https://programcz.github.io/rssub" target="_blank">https://programcz.github.io/rssub</a>。</p>
+<p>访问上图中显示的链接即可阅读订阅文章，比如我的链接为<a href="https://programcz.github.io/rssub" target="_blank">https://programcz.github.io/rssub</a>。</p>
+
+<h3 id="28-查看抓取日志">2.8 查看抓取日志</h3>
+
+<p>访问导航栏右侧的<code class="language-plaintext highlighter-rouge">Log</code>链接即可查看抓取日志，用于显示各订阅源的抓取状态，比如我的链接为<a href="https://programcz.github.io/rssub/worker.log" target="_blank">https://programcz.github.io/rssub/worker.log</a>。</p>
 
 <h2 id="3-关于rssub的一些问题">3 关于RSSub的一些问题</h2>
 
@@ -125,7 +131,7 @@ description: RSSub是一个无需自备服务器的RSS订阅器，完全由GitHu
 
 <p>这是我在开发这个项目的时候最先考虑的问题，所以我已发邮件询问GitHub，还未收到回复。</p>
 
-<p>如果GitHub认为RSSub构成滥用行为，我将立刻删除项目。</p>
+<p><strong>如果GitHub认为RSSub构成滥用行为，我将立刻删除项目。</strong></p>
 
 <h3 id="32-rssub是否构成对于文章原作者的侵权行为">3.2 RSSub是否构成对于文章原作者的侵权行为</h3>
 
@@ -135,7 +141,7 @@ description: RSSub是一个无需自备服务器的RSS订阅器，完全由GitHu
 
 <ul class="task-list">
   <li class="task-list-item">
-    <p><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />解决某些站点的图片防盗链问题</p>
+    <p><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />添加英文文档</p>
   </li>
   <li class="task-list-item">
     <p><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />优化文章排版</p>
@@ -144,18 +150,6 @@ description: RSSub是一个无需自备服务器的RSS订阅器，完全由GitHu
     <p><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />优化爬虫效率</p>
   </li>
   <li class="task-list-item">
-    <p><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />支持按照订阅源浏览订阅文章</p>
-  </li>
-  <li class="task-list-item">
-    <p><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />支持按日期浏览订阅文章</p>
-  </li>
-  <li class="task-list-item">
-    <p><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />支持按日期爬取订阅源</p>
-  </li>
-  <li class="task-list-item">
     <p><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />支持使用<code class="language-plaintext highlighter-rouge">OPML</code>文件管理订阅源</p>
-  </li>
-  <li class="task-list-item">
-    <p><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />添加英文文档</p>
   </li>
 </ul>
