@@ -1,0 +1,569 @@
+---
+layout:      post
+title:       CMake 教程：从零开始编写 CMakeLists.txt
+link:        https://programcz.github.io/2020/03/17/CMake-%E6%95%99%E7%A8%8B-%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%BC%96%E5%86%99-CMakeLists-txt.html
+date:        2020-03-17 10:24:00
+category:    个人博客
+source:      ProgramCZ's Blog
+description: CMake 是跨平台的开源工具，可以用于编译、测试和打包软件，本文从零开始编写一个比较基础的 CMakeLists.txt，记录其特有的语法。  CMake 官网：https //cmake.org/ CMake 源码地址（镜像）：https //github.com/Kitware/CMake C
+---
+
+<p>CMake 是跨平台的开源工具，可以用于编译、测试和打包软件，本文从零开始编写一个比较基础的 <code class="language-plaintext highlighter-rouge">CMakeLists.txt</code>，记录其特有的语法。</p>
+
+<!--more-->
+
+<p>CMake 官网：<a href="https://cmake.org/">https://cmake.org/</a></p>
+
+<p>CMake 源码地址（镜像）：<a href="https://github.com/Kitware/CMake">https://github.com/Kitware/CMake</a></p>
+
+<p>CMake 英文教程（最新版本）：<a href="https://cmake.org/cmake/help/latest/guide/tutorial/index.html">https://cmake.org/cmake/help/latest/guide/tutorial/index.html</a></p>
+
+<p>CMake 文档搜索（最新版本）：<a href="https://cmake.org/cmake/help/latest/search.html">https://cmake.org/cmake/help/latest/search.html</a></p>
+
+<p class="warning">本文使用 Ubuntu 当前版本为 <code class="language-plaintext highlighter-rouge">16.04</code>，使用 CMake 当前版本为 <code class="language-plaintext highlighter-rouge">3.17.20200315-ga6d95f5</code>，<code class="language-plaintext highlighter-rouge">CMakeLists.txt</code> 设置 CMake 最低版本为 <code class="language-plaintext highlighter-rouge">3.5</code>。因而，命令和语法可能与读者所用版本有所不同，望周知。</p>
+
+<h2 id="0-教程源码">0 教程源码</h2>
+
+<p>GitHub 地址：<a href="https://github.com/ProgramCZ/code_cloud_a/2019-03/cmake-tutorial">https://github.com/ProgramCZ/code_cloud_a/2019-03/cmake-tutorial</a></p>
+
+<p>读者也可以下载整个仓库，进入指定目录查看源码：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git clone <span class="nt">--depth</span><span class="o">=</span>1 https://github.com/ProgramCZ/code_cloud_a
+<span class="nv">$ </span><span class="nb">cd </span>code_cloud_a/2019-03/cmake-tutorial
+</code></pre></div></div>
+
+<h2 id="1-创建基础模板">1 创建基础模板</h2>
+
+<p><strong>根目录中的 <code class="language-plaintext highlighter-rouge">CMakeLists.txt</code> 文件一览：</strong></p>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cmake_minimum_required</span><span class="p">(</span>VERSION 3.5<span class="p">)</span>
+
+<span class="c1"># set the project name and version</span>
+<span class="nb">project</span><span class="p">(</span>Tutorial VERSION 1.0<span class="p">)</span>
+
+<span class="c1"># specify the C++ standard</span>
+<span class="nb">set</span><span class="p">(</span>CMAKE_CXX_STANDARD 11<span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span>CMAKE_CXX_STANDARD_REQUIRED ON<span class="p">)</span>
+
+<span class="c1"># configure a header file to pass some of the CMake settings</span>
+<span class="c1"># to the source code</span>
+<span class="nb">configure_file</span><span class="p">(</span>TutorialConfig.h.in TutorialConfig.h<span class="p">)</span>
+
+<span class="c1"># add the executable</span>
+<span class="nb">add_executable</span><span class="p">(</span>Tutorial main.cpp<span class="p">)</span>
+
+<span class="c1"># add the binary tree to the search path for include files</span>
+<span class="c1"># so that we will find TutorialConfig.h</span>
+<span class="nb">target_include_directories</span><span class="p">(</span>Tutorial PUBLIC
+                           <span class="s2">"</span><span class="si">${</span><span class="nv">PROJECT_BINARY_DIR</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="11-设置-cmake-最低版本">1.1 设置 CMake 最低版本</h3>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Format</span>
+<span class="nb">cmake_minimum_required</span><span class="p">(</span>VERSION &lt;min&gt;[...&lt;max&gt;] [FATAL_ERROR]<span class="p">)</span>
+<span class="c1"># Example</span>
+<span class="nb">cmake_minimum_required</span><span class="p">(</span>VERSION 3.5<span class="p">)</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>参考：<a href="https://cmake.org/cmake/help/latest/command/cmake_minimum_required.html">https://cmake.org/cmake/help/latest/command/cmake_minimum_required.html</a></p>
+</blockquote>
+
+<h3 id="12-设置项目名称和版本">1.2 设置项目名称和版本</h3>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Format</span>
+<span class="nb">project</span><span class="p">(</span>&lt;PROJECT-NAME&gt; [&lt;language-name&gt;...]<span class="p">)</span>
+<span class="nb">project</span><span class="p">(</span>&lt;PROJECT-NAME&gt;
+        [VERSION &lt;major&gt;[.&lt;minor&gt;[.&lt;patch&gt;[.&lt;tweak&gt;]]]]
+        [DESCRIPTION &lt;project-description-string&gt;]
+        [HOMEPAGE_URL &lt;url-string&gt;]
+        [LANGUAGES &lt;language-name&gt;...]<span class="p">)</span>
+<span class="c1"># Example</span>
+<span class="nb">project</span><span class="p">(</span>Tutorial VERSION 1.0<span class="p">)</span>
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>上述指令设置变量：</p>
+
+    <ul>
+      <li>
+        <p><code class="language-plaintext highlighter-rouge">PROJECT_NAME</code></p>
+      </li>
+      <li>
+        <p><code class="language-plaintext highlighter-rouge">PROJECT_SOURCE_DIR</code> 和 <code class="language-plaintext highlighter-rouge">&lt;PROJECT-NAME&gt;_SOURCE_DIR</code></p>
+      </li>
+      <li>
+        <p><code class="language-plaintext highlighter-rouge">PROJECT_BINARY_DIR</code> 和 <code class="language-plaintext highlighter-rouge">&lt;PROJECT-NAME&gt;_BINARY_DIR</code></p>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>选项 <code class="language-plaintext highlighter-rouge">VERSION</code> 设置变量：</p>
+
+    <ul>
+      <li>
+        <p><code class="language-plaintext highlighter-rouge">PROJECT_VERSION</code> 和 <code class="language-plaintext highlighter-rouge">&lt;PROJECT-NAME&gt;_VERSION</code></p>
+      </li>
+      <li>
+        <p><code class="language-plaintext highlighter-rouge">PROJECT_VERSION_MAJOR</code> 和 <code class="language-plaintext highlighter-rouge">&lt;PROJECT-NAME&gt;_VERSION_MAJOR</code></p>
+      </li>
+      <li>
+        <p><code class="language-plaintext highlighter-rouge">PROJECT_VERSION_MINOR</code> 和 <code class="language-plaintext highlighter-rouge">&lt;PROJECT-NAME&gt;_VERSION_MINOR</code></p>
+      </li>
+      <li>
+        <p><code class="language-plaintext highlighter-rouge">PROJECT_VERSION_PATCH</code> 和 <code class="language-plaintext highlighter-rouge">&lt;PROJECT-NAME&gt;_VERSION_PATCH</code></p>
+      </li>
+      <li>
+        <p><code class="language-plaintext highlighter-rouge">PROJECT_VERSION_TWEAK</code> 和 <code class="language-plaintext highlighter-rouge">&lt;PROJECT-NAME&gt;_VERSION_TWEAK</code></p>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<blockquote>
+  <p>参考：<a href="https://cmake.org/cmake/help/latest/command/project.html">https://cmake.org/cmake/help/latest/command/project.html</a></p>
+</blockquote>
+
+<h3 id="13-设置-c-标准">1.3 设置 C++ 标准</h3>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Example</span>
+<span class="nb">set</span><span class="p">(</span>CMAKE_CXX_STANDARD 11<span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span>CMAKE_CXX_STANDARD_REQUIRED ON<span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="14-传递-cmake-变量">1.4 传递 CMake 变量</h3>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Format</span>
+<span class="nb">configure_file</span><span class="p">(</span>&lt;input&gt; &lt;output&gt;
+               [COPYONLY] [ESCAPE_QUOTES] [@ONLY]
+               [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ]<span class="p">)</span>
+<span class="c1"># Example</span>
+<span class="nb">configure_file</span><span class="p">(</span>TutorialConfig.h.in TutorialConfig.h<span class="p">)</span>
+</code></pre></div></div>
+
+<p>可以将头文件模板 <code class="language-plaintext highlighter-rouge">TutorialConfig.h.in</code>：</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// TutorialConfig.h.in</span>
+<span class="c1">// the configured options and settings for Tutorial</span>
+<span class="cp">#define Tutorial_VERSION_MAJOR @Tutorial_VERSION_MAJOR@
+#define Tutorial_VERSION_MINOR @Tutorial_VERSION_MINOR@
+</span></code></pre></div></div>
+
+<p>在预处理阶段改写为头文件 <code class="language-plaintext highlighter-rouge">TutorialConfig.h</code>：</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// TutorialConfig.h</span>
+<span class="c1">// the configured options and settings for Tutorial</span>
+<span class="cp">#define Tutorial_VERSION_MAJOR 1
+#define Tutorial_VERSION_MINOR 0
+</span></code></pre></div></div>
+
+<blockquote>
+  <p>参考：<a href="https://cmake.org/cmake/help/latest/command/configure_file.html">https://cmake.org/cmake/help/latest/command/configure_file.html</a></p>
+</blockquote>
+
+<h3 id="15-添加可执行文件">1.5 添加可执行文件</h3>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Format</span>
+<span class="nb">add_executable</span><span class="p">(</span>&lt;name&gt; [WIN32] [MACOSX_BUNDLE]
+               [EXCLUDE_FROM_ALL]
+               [source1] [source2 ...]<span class="p">)</span>
+<span class="c1"># Example</span>
+<span class="nb">add_executable</span><span class="p">(</span>Tutorial main.cpp<span class="p">)</span>
+</code></pre></div></div>
+
+<p>上述指令从源代码 <code class="language-plaintext highlighter-rouge">main.cpp</code>：</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;cmath&gt;
+#include &lt;string&gt;
+#include &lt;iostream&gt;
+#include "TutorialConfig.h"
+</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="k">const</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">argc</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">" Version: "</span>
+				  <span class="o">&lt;&lt;</span> <span class="n">Tutorial_VERSION_MAJOR</span> <span class="o">&lt;&lt;</span> <span class="s">"."</span>
+				  <span class="o">&lt;&lt;</span> <span class="n">Tutorial_VERSION_MINOR</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+		<span class="n">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">"Usage: "</span> <span class="o">&lt;&lt;</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+				  <span class="o">&lt;&lt;</span> <span class="s">" number"</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+		<span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+	<span class="p">}</span>
+
+	<span class="k">const</span> <span class="kt">double</span> <span class="n">inputValue</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">stod</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+	<span class="k">const</span> <span class="kt">double</span> <span class="n">outputValue</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">inputValue</span><span class="p">);</span>
+	<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The square root of "</span> <span class="o">&lt;&lt;</span> <span class="n">inputValue</span>
+			  <span class="o">&lt;&lt;</span> <span class="s">" is "</span> <span class="o">&lt;&lt;</span> <span class="n">outputValue</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>编译产生可执行文件 <code class="language-plaintext highlighter-rouge">Tutorial</code>。</p>
+
+<blockquote>
+  <p>参考：<a href="https://cmake.org/cmake/help/latest/command/add_executable.html">https://cmake.org/cmake/help/latest/command/add_executable.html</a></p>
+</blockquote>
+
+<h3 id="16-添加-include-目录">1.6 添加 <code class="language-plaintext highlighter-rouge">include</code> 目录</h3>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Format</span>
+<span class="nb">target_include_directories</span><span class="p">(</span>&lt;target&gt; [SYSTEM] [BEFORE]
+	&lt;INTERFACE|PUBLIC|PRIVATE&gt; [items1...]
+	[&lt;INTERFACE|PUBLIC|PRIVATE&gt; [items2...] ...]<span class="p">)</span>
+<span class="c1"># Example</span>
+<span class="nb">target_include_directories</span><span class="p">(</span>Tutorial PUBLIC
+                           <span class="s2">"</span><span class="si">${</span><span class="nv">PROJECT_BINARY_DIR</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>上述指令添加 <code class="language-plaintext highlighter-rouge">include</code> 目录，使编译器能够找到头文件 <code class="language-plaintext highlighter-rouge">TutorialConfig.h</code>。</p>
+
+<blockquote>
+  <p>参考：<a href="https://cmake.org/cmake/help/latest/command/target_include_directories.html">https://cmake.org/cmake/help/latest/command/target_include_directories.html</a></p>
+</blockquote>
+
+<h3 id="17-编译项目">1.7 编译项目</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">mkdir </span>build <span class="o">&amp;&amp;</span> <span class="nb">cd </span>build
+<span class="nv">$ </span>cmake .. <span class="o">&amp;&amp;</span> cmake <span class="nt">--build</span> <span class="nb">.</span>
+<span class="nt">--</span> The C compiler identification is GNU 5.4.0
+<span class="nt">--</span> The CXX compiler identification is GNU 5.4.0
+<span class="nt">--</span> Check <span class="k">for </span>working C compiler: /usr/bin/cc
+<span class="nt">--</span> Check <span class="k">for </span>working C compiler: /usr/bin/cc - works
+<span class="nt">--</span> Detecting C compiler ABI info
+<span class="nt">--</span> Detecting C compiler ABI info - <span class="k">done</span>
+<span class="nt">--</span> Detecting C compile features
+<span class="nt">--</span> Detecting C compile features - <span class="k">done</span>
+<span class="nt">--</span> Check <span class="k">for </span>working CXX compiler: /usr/bin/c++
+<span class="nt">--</span> Check <span class="k">for </span>working CXX compiler: /usr/bin/c++ - works
+<span class="nt">--</span> Detecting CXX compiler ABI info
+<span class="nt">--</span> Detecting CXX compiler ABI info - <span class="k">done</span>
+<span class="nt">--</span> Detecting CXX compile features
+<span class="nt">--</span> Detecting CXX compile features - <span class="k">done</span>
+<span class="nt">--</span> Configuring <span class="k">done</span>
+<span class="nt">--</span> Generating <span class="k">done</span>
+<span class="nt">--</span> Build files have been written to: /home/peter/Projects/test_cmake_ws/build
+Scanning dependencies of target Tutorial
+<span class="o">[</span> 50%] Building CXX object CMakeFiles/Tutorial.dir/main.cpp.o
+<span class="o">[</span>100%] Linking CXX executable Tutorial
+<span class="o">[</span>100%] Built target Tutorial
+</code></pre></div></div>
+
+<h3 id="18-运行项目">1.8 运行项目</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>./Tutorial 10
+The square root of 10 is 3.16228
+<span class="nv">$ </span>./Tutorial
+./Tutorial Version: 1.0
+Usage: ./Tutorial number
+</code></pre></div></div>
+
+<h2 id="2-加入自定义库">2 加入自定义库</h2>
+
+<p>某些情况下，需要添加一个自定义库，比如 <code class="language-plaintext highlighter-rouge">MathFunctions</code> 库：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>├── main.cpp
+├── MathFunctions
+│   ├── MathFunctions.h
+│   └── mysqrt.cpp
+</code></pre></div></div>
+
+<hr />
+
+<p><strong><code class="language-plaintext highlighter-rouge">MathFunctions</code> 目录中的 <code class="language-plaintext highlighter-rouge">CMakeLists.txt</code> 文件一览：</strong></p>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">add_library</span><span class="p">(</span>MathFunctions mysqrt.cpp<span class="p">)</span>
+
+<span class="c1"># state that anybody linking to us needs to include the current source dir</span>
+<span class="c1"># to find MathFunctions.h, while we don't.</span>
+<span class="nb">target_include_directories</span><span class="p">(</span>MathFunctions
+	INTERFACE <span class="si">${</span><span class="nv">CMAKE_CURRENT_SOURCE_DIR</span><span class="si">}</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="21-为库的用户添加库">2.1 为库的用户添加库</h3>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Format</span>
+<span class="nb">add_library</span><span class="p">(</span>&lt;name&gt; [STATIC | SHARED | MODULE]
+            [EXCLUDE_FROM_ALL]
+            [source1] [source2 ...]<span class="p">)</span>
+<span class="c1"># Example</span>
+<span class="nb">add_library</span><span class="p">(</span>MathFunctions mysqrt.cpp<span class="p">)</span>
+</code></pre></div></div>
+
+<p>参考：<a href="https://cmake.org/cmake/help/latest/command/add_library.html">https://cmake.org/cmake/help/latest/command/add_library.html</a></p>
+
+<h3 id="22-为库的用户添加-include-目录">2.2 为库的用户添加 <code class="language-plaintext highlighter-rouge">include</code> 目录</h3>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Example</span>
+<span class="nb">target_include_directories</span><span class="p">(</span>MathFunctions
+	INTERFACE <span class="si">${</span><span class="nv">CMAKE_CURRENT_SOURCE_DIR</span><span class="si">}</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>上述指令<strong>为库的用户</strong>添加 <code class="language-plaintext highlighter-rouge">include</code> 目录，使编译器能够找到头文件 <code class="language-plaintext highlighter-rouge">MathFunctions.h</code>。</p>
+
+<hr />
+
+<p><strong>根目录中的<code class="language-plaintext highlighter-rouge">CMakeLists.txt</code> 文件一览：</strong></p>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cmake_minimum_required</span><span class="p">(</span>VERSION 3.5<span class="p">)</span>
+
+<span class="c1"># set the project name and version</span>
+<span class="nb">project</span><span class="p">(</span>Tutorial VERSION 1.0<span class="p">)</span>
+
+<span class="c1"># specify the C++ standard</span>
+<span class="nb">set</span><span class="p">(</span>CMAKE_CXX_STANDARD 11<span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span>CMAKE_CXX_STANDARD_REQUIRED ON<span class="p">)</span>
+
+<span class="c1"># should we use our own math functions</span>
+<span class="nb">option</span><span class="p">(</span>USE_MYMATH <span class="s2">"Use tutorial provided math implementation"</span> ON<span class="p">)</span>
+
+<span class="c1"># configure a header file to pass some of the CMake settings</span>
+<span class="c1"># to the source code</span>
+<span class="nb">configure_file</span><span class="p">(</span>TutorialConfig.h.in TutorialConfig.h<span class="p">)</span>
+
+<span class="c1"># add the MathFunctions library</span>
+<span class="nb">if</span><span class="p">(</span>USE_MYMATH<span class="p">)</span>
+  <span class="nb">add_subdirectory</span><span class="p">(</span>MathFunctions<span class="p">)</span>
+  <span class="nb">list</span><span class="p">(</span>APPEND EXTRA_LIBS MathFunctions<span class="p">)</span>
+<span class="nb">endif</span><span class="p">()</span>
+
+<span class="c1"># add the executable</span>
+<span class="nb">add_executable</span><span class="p">(</span>Tutorial main.cpp<span class="p">)</span>
+
+<span class="nb">target_link_libraries</span><span class="p">(</span>Tutorial PUBLIC <span class="si">${</span><span class="nv">EXTRA_LIBS</span><span class="si">}</span><span class="p">)</span>
+
+<span class="c1"># add the binary tree to the search path for include files</span>
+<span class="c1"># so that we will find TutorialConfig.h</span>
+<span class="nb">target_include_directories</span><span class="p">(</span>Tutorial PUBLIC
+                           <span class="s2">"</span><span class="si">${</span><span class="nv">PROJECT_BINARY_DIR</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="23-传递-use_mymath-选项">2.3 传递 <code class="language-plaintext highlighter-rouge">USE_MYMATH</code> 选项</h3>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Format</span>
+<span class="nb">option</span><span class="p">(</span>&lt;variable&gt; <span class="s2">"&lt;help_text&gt;"</span> [value]<span class="p">)</span>
+<span class="c1"># Example</span>
+<span class="nb">option</span><span class="p">(</span>USE_MYMATH <span class="s2">"Use tutorial provided math implementation"</span> ON<span class="p">)</span>
+</code></pre></div></div>
+
+<p>修改头文件模板 <code class="language-plaintext highlighter-rouge">TutorialConfig.h.in</code>：</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// the configured options and settings for Tutorial</span>
+<span class="cp">#define Tutorial_VERSION_MAJOR @Tutorial_VERSION_MAJOR@
+#define Tutorial_VERSION_MINOR @Tutorial_VERSION_MINOR@
+#cmakedefine USE_MYMATH
+</span></code></pre></div></div>
+
+<p>根据 <code class="language-plaintext highlighter-rouge">USE_MYMATH</code> 选项判断使用哪个函数：</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#ifdef USE_MYMATH
+</span>	<span class="cp">#include "MathFunctions.h"
+#endif
+</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="k">const</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+	<span class="c1">// ...</span>
+	<span class="cp">#ifdef USE_MYMATH
+</span>		<span class="k">const</span> <span class="kt">double</span> <span class="n">outputValue</span> <span class="o">=</span> <span class="n">mysqrt</span><span class="p">(</span><span class="n">inputValue</span><span class="p">);</span>
+	<span class="cp">#else
+</span>		<span class="k">const</span> <span class="kt">double</span> <span class="n">outputValue</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">inputValue</span><span class="p">);</span>
+	<span class="cp">#endif
+</span>	<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The square root of "</span> <span class="o">&lt;&lt;</span> <span class="n">inputValue</span>
+			  <span class="o">&lt;&lt;</span> <span class="s">" is "</span> <span class="o">&lt;&lt;</span> <span class="n">outputValue</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="24-添加-mathfunctions-目录">2.4 添加 <code class="language-plaintext highlighter-rouge">MathFunctions</code> 目录</h3>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Format</span>
+<span class="nb">add_subdirectory</span><span class="p">(</span>source_dir [binary_dir] [EXCLUDE_FROM_ALL]<span class="p">)</span>
+<span class="c1"># Example</span>
+<span class="nb">add_subdirectory</span><span class="p">(</span>MathFunctions<span class="p">)</span>
+</code></pre></div></div>
+
+<p>参考：<a href="https://cmake.org/cmake/help/latest/command/add_subdirectory.html">https://cmake.org/cmake/help/latest/command/add_subdirectory.html</a></p>
+
+<h3 id="25-添加链接库">2.5 添加链接库</h3>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Format</span>
+<span class="nb">list</span><span class="p">(</span>APPEND &lt;list&gt; [&lt;element&gt;...]<span class="p">)</span>
+<span class="c1"># Example</span>
+<span class="nb">list</span><span class="p">(</span>APPEND EXTRA_LIBS MathFunctions<span class="p">)</span>
+</code></pre></div></div>
+
+<p>参考：<a href="https://cmake.org/cmake/help/latest/command/list.html">https://cmake.org/cmake/help/latest/command/list.html</a></p>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Format</span>
+<span class="nb">target_link_libraries</span><span class="p">(</span>&lt;target&gt;
+                      &lt;PRIVATE|PUBLIC|INTERFACE&gt; &lt;item&gt;...
+                     [&lt;PRIVATE|PUBLIC|INTERFACE&gt; &lt;item&gt;...]...<span class="p">)</span>
+<span class="c1"># Example</span>
+<span class="nb">target_link_libraries</span><span class="p">(</span>Tutorial PUBLIC <span class="si">${</span><span class="nv">EXTRA_LIBS</span><span class="si">}</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>参考：<a href="https://cmake.org/cmake/help/latest/command/target_link_libraries.html">https://cmake.org/cmake/help/latest/command/target_link_libraries.html</a></p>
+
+<h3 id="26-编译项目">2.6 编译项目</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cd </span>build
+<span class="nv">$ </span>cmake <span class="nt">-DUSE_MYMATH</span><span class="o">=</span>ON .. <span class="o">&amp;&amp;</span> cmake <span class="nt">--build</span> <span class="nb">.</span>
+<span class="nv">$ </span>cmake <span class="nt">-DUSE_MYMATH</span><span class="o">=</span>OFF .. <span class="o">&amp;&amp;</span> cmake <span class="nt">--build</span> <span class="nb">.</span>
+</code></pre></div></div>
+
+<h2 id="3-安装和测试">3 安装和测试</h2>
+
+<h3 id="31-设置安装目录">3.1 设置安装目录</h3>
+
+<p><strong>在 <code class="language-plaintext highlighter-rouge">MathFunctions</code> 目录中的 <code class="language-plaintext highlighter-rouge">CMakeLists.txt</code> 文件最后添加：</strong></p>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">install</span><span class="p">(</span>TARGETS MathFunctions DESTINATION lib<span class="p">)</span>
+<span class="nb">install</span><span class="p">(</span>FILES MathFunctions.h DESTINATION include<span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>在根目录中的 <code class="language-plaintext highlighter-rouge">CMakeLists.txt</code> 文件最后添加：</strong></p>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">install</span><span class="p">(</span>TARGETS Tutorial DESTINATION bin<span class="p">)</span>
+<span class="nb">install</span><span class="p">(</span>FILES <span class="s2">"</span><span class="si">${</span><span class="nv">PROJECT_BINARY_DIR</span><span class="si">}</span><span class="s2">/TutorialConfig.h"</span>
+  DESTINATION include<span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="32-安装项目">3.2 安装项目</h3>
+
+<p>CMake 的 <code class="language-plaintext highlighter-rouge">3.15</code> 以下版本只能使用：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cd </span>build
+<span class="nv">$ </span><span class="nb">sudo </span>make <span class="nb">install</span>
+</code></pre></div></div>
+
+<p>CMake 的 <code class="language-plaintext highlighter-rouge">3.15</code> 及以上版本可以使用：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cd </span>build
+<span class="nv">$ </span><span class="nb">sudo </span>cmake <span class="nt">--install</span> <span class="nb">.</span>
+</code></pre></div></div>
+
+<p>上述指令默认将项目安装在 <code class="language-plaintext highlighter-rouge">/usr/local/</code> 路径下，可以指定安装路径：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">sudo </span>cmake <span class="nt">--install</span> <span class="nb">.</span> <span class="nt">--prefix</span> /tmp/
+</code></pre></div></div>
+
+<p>安装之后就可以直接调用 <code class="language-plaintext highlighter-rouge">Tutorial</code>，而不是 <code class="language-plaintext highlighter-rouge">./Tutorial</code>。</p>
+
+<h3 id="33-设置测试样例">3.3 设置测试样例</h3>
+
+<p><strong>在根目录中的 <code class="language-plaintext highlighter-rouge">CMakeLists.txt</code> 文件最后添加：</strong></p>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">enable_testing</span><span class="p">()</span>
+
+<span class="c1"># does the application run</span>
+<span class="nb">add_test</span><span class="p">(</span>NAME Runs COMMAND Tutorial 25<span class="p">)</span>
+
+<span class="c1"># does the usage message work?</span>
+<span class="nb">add_test</span><span class="p">(</span>NAME Usage COMMAND Tutorial<span class="p">)</span>
+<span class="nb">set_tests_properties</span><span class="p">(</span>Usage
+  PROPERTIES PASS_REGULAR_EXPRESSION <span class="s2">"Usage:.*number"</span><span class="p">)</span>
+
+<span class="c1"># define a function to simplify adding tests</span>
+<span class="nb">function</span><span class="p">(</span>do_test target arg result<span class="p">)</span>
+  <span class="nb">add_test</span><span class="p">(</span>NAME Comp<span class="si">${</span><span class="nv">arg</span><span class="si">}</span> COMMAND <span class="si">${</span><span class="nv">target</span><span class="si">}</span> <span class="si">${</span><span class="nv">arg</span><span class="si">}</span><span class="p">)</span>
+  <span class="nb">set_tests_properties</span><span class="p">(</span>Comp<span class="si">${</span><span class="nv">arg</span><span class="si">}</span>
+    PROPERTIES PASS_REGULAR_EXPRESSION <span class="si">${</span><span class="nv">result</span><span class="si">}</span><span class="p">)</span>
+<span class="nb">endfunction</span><span class="p">(</span>do_test<span class="p">)</span>
+
+<span class="c1"># do a bunch of result based tests</span>
+<span class="nf">do_test</span><span class="p">(</span>Tutorial 5 <span class="s2">"5 is 2.236"</span><span class="p">)</span>
+<span class="nf">do_test</span><span class="p">(</span>Tutorial -25 <span class="s2">"-25 is [-nan|nan|0]"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="331-简单测试">3.3.1 简单测试</h4>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Format</span>
+<span class="nb">add_test</span><span class="p">(</span>NAME &lt;name&gt; COMMAND &lt;command&gt; [&lt;arg&gt;...]
+         [CONFIGURATIONS &lt;config&gt;...]
+         [WORKING_DIRECTORY &lt;dir&gt;]
+         [COMMAND_EXPAND_LISTS]<span class="p">)</span>
+<span class="c1"># Example</span>
+<span class="nb">add_test</span><span class="p">(</span>NAME Runs COMMAND Tutorial 25<span class="p">)</span>
+</code></pre></div></div>
+
+<p>上述指令简单测试项目是否能够运行，通过则表示未报错、未崩溃、返回 <code class="language-plaintext highlighter-rouge">0</code>。</p>
+
+<blockquote>
+  <p>参考：<a href="https://cmake.org/cmake/help/latest/command/add_test.html">https://cmake.org/cmake/help/latest/command/add_test.html</a></p>
+</blockquote>
+
+<h4 id="332-对比测试">3.3.2 对比测试</h4>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Format</span>
+<span class="nb">add_test</span><span class="p">(</span>NAME &lt;name&gt; COMMAND &lt;command&gt; [&lt;arg&gt;...]
+         [CONFIGURATIONS &lt;config&gt;...]
+         [WORKING_DIRECTORY &lt;dir&gt;]
+         [COMMAND_EXPAND_LISTS]<span class="p">)</span>
+<span class="nb">set_tests_properties</span><span class="p">(</span>test1 [test2...] PROPERTIES prop1 value1 prop2 value2<span class="p">)</span>
+<span class="c1"># Example</span>
+<span class="nb">add_test</span><span class="p">(</span>NAME Usage COMMAND Tutorial<span class="p">)</span>
+<span class="nb">set_tests_properties</span><span class="p">(</span>Usage
+  PROPERTIES PASS_REGULAR_EXPRESSION <span class="s2">"Usage:.*number"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>上述指令对比测试项目的输出与正则表达式是否匹配，可以将其封装为函数：</p>
+
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Example</span>
+<span class="nb">function</span><span class="p">(</span>do_test target arg result<span class="p">)</span>
+  <span class="nb">add_test</span><span class="p">(</span>NAME Comp<span class="si">${</span><span class="nv">arg</span><span class="si">}</span> COMMAND <span class="si">${</span><span class="nv">target</span><span class="si">}</span> <span class="si">${</span><span class="nv">arg</span><span class="si">}</span><span class="p">)</span>
+  <span class="nb">set_tests_properties</span><span class="p">(</span>Comp<span class="si">${</span><span class="nv">arg</span><span class="si">}</span>
+    PROPERTIES PASS_REGULAR_EXPRESSION <span class="si">${</span><span class="nv">result</span><span class="si">}</span><span class="p">)</span>
+<span class="nb">endfunction</span><span class="p">(</span>do_test<span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="34-测试项目">3.4 测试项目</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cd </span>build
+<span class="nv">$ </span>ctest <span class="nt">-VV</span>
+UpdateCTestConfiguration  from :/home/peter/Projects/test_cmake_ws/build/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/home/peter/Projects/test_cmake_ws/build/DartConfiguration.tcl
+Test project /home/peter/Projects/test_cmake_ws/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating <span class="nb">test </span>list <span class="k">for </span>fixtures
+Added 0 tests to meet fixture requirements
+Checking <span class="nb">test </span>dependency graph...
+Checking <span class="nb">test </span>dependency graph end
+<span class="nb">test </span>1
+    Start 1: Runs
+
+1: Test <span class="nb">command</span>: /home/peter/Projects/test_cmake_ws/build/Tutorial <span class="s2">"25"</span>
+1: Test <span class="nb">timeout </span>computed to be: 10000000
+1: The square root of 25 is 5
+1/4 Test <span class="c">#1: Runs .............................   Passed    0.03 sec</span>
+<span class="nb">test </span>2
+    Start 2: Usage
+
+2: Test <span class="nb">command</span>: /home/peter/Projects/test_cmake_ws/build/Tutorial
+2: Test <span class="nb">timeout </span>computed to be: 10000000
+2: /home/peter/Projects/test_cmake_ws/build/Tutorial Version: 1.0
+2: Usage: /home/peter/Projects/test_cmake_ws/build/Tutorial number
+2/4 Test <span class="c">#2: Usage ............................   Passed    0.00 sec</span>
+<span class="nb">test </span>3
+    Start 3: Comp5
+
+3: Test <span class="nb">command</span>: /home/peter/Projects/test_cmake_ws/build/Tutorial <span class="s2">"5"</span>
+3: Test <span class="nb">timeout </span>computed to be: 10000000
+3: The square root of 5 is 2.23607
+3/4 Test <span class="c">#3: Comp5 ............................   Passed    0.00 sec</span>
+<span class="nb">test </span>4
+    Start 4: Comp-25
+
+4: Test <span class="nb">command</span>: /home/peter/Projects/test_cmake_ws/build/Tutorial <span class="s2">"-25"</span>
+4: Test <span class="nb">timeout </span>computed to be: 10000000
+4: The square root of <span class="nt">-25</span> is <span class="nt">-nan</span>
+4/4 Test <span class="c">#4: Comp-25 ..........................   Passed    0.01 sec</span>
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test <span class="nb">time</span> <span class="o">(</span>real<span class="o">)</span> <span class="o">=</span>   0.12 sec
+</code></pre></div></div>
+
+<h2 id="4-写在最后">4 写在最后</h2>
+
+<p>未来一段时间可能会找一些优秀的 C++ 项目源码来阅读，学习编码技巧的同时也能进一步了解如何编写项目的 <code class="language-plaintext highlighter-rouge">CMakeLists.txt</code>。</p>
